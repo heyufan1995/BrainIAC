@@ -136,7 +136,33 @@ Key configuration sections:
 - **loss**: Temperature parameter
 - **train**: Learning rate, epochs, scheduler
 - **trainer**: DDP settings, precision
-- **logger**: Logging configuration
+- **logger**: Logging configuration (WandB or TensorBoard)
+
+### Weights & Biases (WandB) Setup
+
+The default config uses WandB for visualization. To use WandB:
+
+1. **Install WandB** (if not already installed):
+   ```bash
+   pip install wandb
+   ```
+
+2. **Login to WandB** (first time only):
+   ```bash
+   wandb login
+   ```
+   Enter your API key from [wandb.ai](https://wandb.ai)
+
+3. **Configure in YAML**:
+   ```yaml
+   logger:
+     type: "wandb"  # Use "wandb" or "tensorboard"
+     project_name: "brainiac_pretrain"  # Your WandB project name
+     run_name: "simclr_pretrain"  # Run name
+     entity: null  # Optional: your WandB team/entity name
+   ```
+
+4. **View results**: Training metrics will automatically sync to [wandb.ai](https://wandb.ai)
 
 ### Single GPU Training
 
@@ -244,7 +270,14 @@ Training produces:
   - Last model: `last.ckpt`
   - Backbone-only checkpoints (for fine-tuning): `backbone_epoch_XX.pt`
 
-- **Logs**: TensorBoard or Weights & Biases logs in `logs/`
+- **Logs**: 
+  - **Weights & Biases (WandB)**: View training metrics, loss curves, and system metrics at [wandb.ai](https://wandb.ai)
+    - Project name: Set in `logger.project_name` (default: "brainiac_pretrain")
+    - Run name: Set in `logger.run_name` (default: "simclr_pretrain")
+    - To use WandB: Set `logger.type: "wandb"` in config
+    - First time: You'll be prompted to login (`wandb login`)
+  - **TensorBoard**: Local logs in `logs/` directory
+    - View with: `tensorboard --logdir logs/`
 
 ## Using Pretrained Weights
 

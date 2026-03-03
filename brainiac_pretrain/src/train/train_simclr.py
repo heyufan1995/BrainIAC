@@ -214,6 +214,8 @@ def train_simclr(config_path: str, resume_from: Optional[str] = None):
             project=logger_config.get("project_name", "brainiac_pretrain"),
             name=logger_config.get("run_name", "simclr"),
             save_dir=logger_config.get("save_dir", "./logs"),
+            entity=logger_config.get("entity"),  # Optional: WandB entity/team
+            log_model=False,  # Don't log model checkpoints to WandB (saves space)
         )
     else:
         logger = TensorBoardLogger(
