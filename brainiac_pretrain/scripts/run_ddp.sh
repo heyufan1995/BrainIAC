@@ -3,8 +3,11 @@
 
 # Configuration
 CONFIG_PATH="configs/pretrain_simclr.yaml"
-NUM_GPUS=4  # Adjust based on your setup
+# Auto-detect number of GPUs, or set manually (e.g., NUM_GPUS=8)
+NUM_GPUS=${NUM_GPUS:-$(nvidia-smi -L | wc -l)}
 MASTER_PORT=29500
+
+echo "Using $NUM_GPUS GPUs for training"
 
 # Run training
 torchrun \

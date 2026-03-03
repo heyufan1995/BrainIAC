@@ -138,23 +138,49 @@ Key configuration sections:
 
 ### Single GPU Training
 
+For single GPU training, modify the config file to set `strategy: null`:
+
+```yaml
+# In configs/pretrain_simclr.yaml, change the trainer section:
+trainer:
+  accelerator: "gpu"
+  devices: "auto"  # or set to 1 explicitly
+  strategy: null  # Set to null for single GPU (change from "ddp")
+  sync_batchnorm: false  # Change from true to false for single GPU
+```
+
+Then run:
 ```bash
 python train.py --config configs/pretrain_simclr.yaml
 ```
 
+**Note:** The default config uses `strategy: "ddp"` which requires multiple GPUs. For single GPU, you must set `strategy: null`.
+
 ### Multi-GPU Training (DDP)
+
+The default config uses DDP. For multi-GPU training:
 
 Using `torchrun` (recommended):
 
+**Specify number of GPUs:**
 ```bash
+# Use 4 GPUs
 torchrun --nproc_per_node=4 train.py --config configs/pretrain_simclr.yaml
+
+# Use 8 GPUs
+torchrun --nproc_per_node=8 train.py --config configs/pretrain_simclr.yaml
+
+# Use all available GPUs (auto-detect)
+torchrun --nproc_per_node=$(nvidia-smi -L | wc -l) train.py --config configs/pretrain_simclr.yaml
 ```
 
-Or use the provided script:
-
+**Or use the provided script** (edit `NUM_GPUS` in the script):
 ```bash
+# Edit scripts/run_ddp.sh to set NUM_GPUS=8 (or your desired number)
 bash scripts/run_ddp.sh
 ```
+
+**Note:** Make sure the number of GPUs matches your system. The `--nproc_per_node` argument should equal the number of GPUs you want to use.
 
 ### Resume Training
 

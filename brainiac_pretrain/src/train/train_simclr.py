@@ -242,16 +242,24 @@ def train_simclr(config_path: str, resume_from: Optional[str] = None):
     train_config = config.get("train", {})
     trainer_config = config.get("trainer", {})
     
+    # Handle strategy: None/null means single GPU, "ddp" means multi-GPU
+    strategy = trainer_config.get("strategy", "ddp")
+    if strategy is None or str(strategy).lower() in ["null", "none", "auto"]:
+        strategy = None  # Single GPU
+        sync_batchnorm = False  # No need to sync for single GPU
+    else:
+        sync_batchnorm = trainer_config.get("sync_batchnorm", True)
+    
     trainer = pl.Trainer(
         max_epochs=train_config.get("max_epochs", 100),
         accelerator=trainer_config.get("accelerator", "gpu"),
         devices=trainer_config.get("devices", "auto"),
-        strategy=trainer_config.get("strategy", "ddp"),
+        strategy=strategy,
         precision=train_config.get("precision", "16-mixed"),
         gradient_clip_val=train_config.get("gradient_clip_val", 1.0),
         logger=logger,
         callbacks=callbacks,
-        sync_batchnorm=trainer_config.get("sync_batchnorm", True),
+        sync_batchnorm=sync_batchnorm,
         log_every_n_steps=trainer_config.get("log_every_n_steps", 50),
         val_check_interval=trainer_config.get("val_check_interval", None),
         enable_progress_bar=trainer_config.get("enable_progress_bar", True),
