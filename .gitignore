@@ -1,0 +1,49 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+dist/
+build/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+*.ipynb
+
+# Environment
+.env
+.venv
+env/
+venv/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# PyTorch
+*.pth
+*.pt
+*.ckpt
+checkpoints/
+logs/
+
+# Data (uncomment if you don't want to commit data files)
+# *.nii.gz
+# *.nii
+# data/
+
+# Weights & Biases
+wandb/
+
+# Temporary files
+*.tmp
+*.log

@@ -1,0 +1,94 @@
+# BrainIAC SimCLR Pretraining Configuration
+
+# Data configuration
+data:
+  json_path: "./data/train_metadata.json"  # Path to JSON file with image paths
+  batch_size: 32  # Batch size per GPU
+  num_workers: 4  # DataLoader workers
+  pin_memory: true
+  
+  # Base preprocessing
+  normalize_nonzero: true  # Normalize only nonzero voxels
+  normalize_channel_wise: true  # Normalize each channel independently
+  orientation: "RAS"  # Target orientation (None to skip)
+  spacing: null  # Target spacing in mm, e.g., [1.0, 1.0, 1.0] (None to skip)
+  
+  # Patch sampling
+  patch_roi: [96, 96, 96]  # Size of patch to crop
+  resize_to: [96, 96, 96]  # Target size after crop (None to use patch_roi)
+  num_crops_per_scan: 1  # Number of crops per scan (K). Set > 1 for multi-crop
+  
+  # Augmentation parameters
+  flip_prob: 0.5
+  flip_axes: [2]  # Axes to flip (None for all axes). [2] = left-right only
+  affine_prob: 0.5
+  rotate_range: [0.1, 0.1, 0.1]  # Rotation range in radians
+  translate_range: [5, 5, 5]  # Translation range in voxels
+  scale_range: [0.1, 0.1, 0.1]  # Scale range
+  noise_prob: 0.2
+  noise_std: 0.05
+  blur_prob: 0.2
+  blur_sigma: [0.5, 1.0]
+  contrast_prob: 0.2
+  contrast_gamma: [0.7, 1.3]
+  scale_intensity_prob: 0.1
+  scale_intensity_factors: [0.8, 1.2]
+  shift_intensity_prob: 0.1
+  shift_intensity_offset: [-0.1, 0.1]
+
+# Model configuration
+model:
+  img_size: [96, 96, 96]  # Input image size
+  patch_size: [16, 16, 16]  # Patch size
+  in_channels: 1  # Input channels
+  hidden_size: 768  # ViT hidden dimension
+  mlp_dim: 3072  # ViT MLP dimension
+  num_layers: 12  # Number of transformer layers
+  num_heads: 12  # Number of attention heads
+  
+  # Projection head
+  proj_input_dim: 768  # Input to projection head (should match hidden_size)
+  proj_hidden_dim: 512  # Hidden dimension of projection head
+  proj_output_dim: 128  # Output dimension (projection dimension)
+
+# Loss configuration
+loss:
+  temperature: 0.07  # Temperature parameter for NT-Xent loss
+
+# Training configuration
+train:
+  max_epochs: 100
+  lr: 0.0001  # Learning rate
+  weight_decay: 0.0001
+  betas: [0.9, 0.999]  # AdamW betas
+  precision: "16-mixed"  # Mixed precision: "16-mixed", "bf16-mixed", or "32-true"
+  gradient_clip_val: 1.0  # Gradient clipping value (None to disable)
+  
+  # Learning rate scheduler
+  scheduler:
+    type: "cosine_warmup"  # Options: "cosine", "cosine_warmup", "step", null
+    warmup_epochs: 10  # For cosine_warmup
+    eta_min: 0.0  # For cosine
+    step_size: 30  # For step
+    gamma: 0.1  # For step
+
+# Trainer configuration (PyTorch Lightning)
+trainer:
+  accelerator: "gpu"  # "gpu" or "cpu"
+  devices: "auto"  # Number of devices or "auto"
+  strategy: "ddp"  # "ddp", "ddp_find_unused_parameters_false", "deepspeed", etc.
+  sync_batchnorm: true  # Sync batch norm across GPUs
+  log_every_n_steps: 50
+  val_check_interval: null  # Validation check interval (None = end of epoch)
+  enable_progress_bar: true
+  enable_model_summary: true
+
+# Logger configuration
+logger:
+  type: "tensorboard"  # "tensorboard" or "wandb"
+  project_name: "brainiac_pretrain"  # For wandb
+  run_name: "simclr_pretrain"
+  save_dir: "./logs"
+  checkpoint_dir: "./checkpoints"
+  checkpoint_filename: "brainiac-{epoch:02d}-{train_loss:.4f}"
+  save_top_k: 3  # Save top K checkpoints
