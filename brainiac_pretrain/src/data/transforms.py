@@ -138,6 +138,7 @@ def build_view_augment_transform(
     scale_intensity_factors: Tuple[float, float] = (0.8, 1.2),
     shift_intensity_prob: float = 0.1,
     shift_intensity_offset: Tuple[float, float] = (-0.1, 0.1),
+    final_size: Optional[Tuple[int, int, int]] = None,
 ) -> Compose:
     """
     Build stochastic augmentation transform for creating views.
@@ -240,6 +241,17 @@ def build_view_augment_transform(
                 keys=["image"],
                 prob=shift_intensity_prob,
                 offsets=shift_intensity_offset,
+            )
+        )
+    
+    # Ensure exact size after all augmentations (affine transforms can change size)
+    # This is critical for ViT which expects exact patch count
+    if final_size is not None:
+        transforms.append(
+            Resized(
+                keys=["image"],
+                spatial_size=final_size,
+                mode="trilinear",
             )
         )
     

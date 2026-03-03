@@ -134,6 +134,10 @@ class PretrainDataModule(pl.LightningDataModule):
             resize_to=self.resize_to,
         )
         
+        # Determine final size (should match model input size)
+        # Use resize_to if specified, otherwise use patch_roi
+        final_size = self.resize_to if self.resize_to is not None else self.patch_roi
+        
         aug_transform = build_view_augment_transform(
             flip_prob=self.flip_prob,
             flip_axes=self.flip_axes,
@@ -151,6 +155,7 @@ class PretrainDataModule(pl.LightningDataModule):
             scale_intensity_factors=self.scale_intensity_factors,
             shift_intensity_prob=self.shift_intensity_prob,
             shift_intensity_offset=self.shift_intensity_offset,
+            final_size=final_size,  # Ensure exact size after augmentations
         )
         
         # Combine into TwoCropsTransform

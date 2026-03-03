@@ -2,7 +2,7 @@
 
 # Data configuration
 data:
-  json_path: "./data/train_metadata.json"  # Path to JSON file with image paths
+  json_path: "metadata_test.json"  # Path to JSON file with image paths
   batch_size: 32  # Batch size per GPU
   num_workers: 4  # DataLoader workers
   pin_memory: true
