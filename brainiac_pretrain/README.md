@@ -49,7 +49,34 @@ pip install -r ../requirements.txt
 
 ## Data Preparation
 
-### JSON Metadata Format
+### Option 1: BIDS-Formatted Datasets
+
+If your data is in BIDS format, use the automated script:
+
+```bash
+python brainiac_pretrain/scripts/create_metadata_from_bids.py \
+    --bids_dir /path/to/OpenMind \
+    --output metadata.json \
+    --sequences T1w inplaneT2
+```
+
+This will automatically scan your BIDS structure and create the JSON metadata file. See [BIDS_DATASET.md](docs/BIDS_DATASET.md) for detailed instructions.
+
+### Option 2: MR-RATE-Formatted Datasets
+
+If your data is in MR-RATE format (batch/subject/img structure), use:
+
+```bash
+python brainiac_pretrain/scripts/create_metadata_from_mrrate.py \
+    --data_dir /path/to/mri \
+    --output metadata.json \
+    --sequences t1w t2w flair \
+    --orientations axi
+```
+
+See [MR_RATE_DATASET.md](docs/MR_RATE_DATASET.md) for detailed instructions.
+
+### Option 3: Manual JSON Metadata Format
 
 Create a JSON file listing all training images. Each record should have:
 
@@ -80,9 +107,9 @@ For multi-sequence data (optional):
 ]
 ```
 
-### Create Sample JSON
+### Create Sample JSON from Directory
 
-You can use the utility script to create a sample JSON:
+You can use the utility script to create a sample JSON from a directory:
 
 ```python
 from src.utils.io import create_sample_json

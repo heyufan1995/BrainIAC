@@ -85,16 +85,28 @@ class PretrainDataset(Dataset):
         - "image": preprocessed image tensor (C, D, H, W)
         - "meta": metadata dict
         """
+        import random
+        
         record_idx = self.valid_indices[idx]
         record = self.metadata[record_idx]
         
         # Handle single image or multi-sequence
         if isinstance(record["image"], str):
             image_path = record["image"]
+            sequence_name = None
         elif isinstance(record["image"], dict):
-            # For multi-sequence, use first available sequence
-            # In practice, you might want to sample randomly or use a specific sequence
-            image_path = next(iter(record["image"].values()))
+            # For multi-sequence, randomly sample one sequence for diversity
+            # This helps the model learn from different sequences during pretraining
+            available_sequences = {
+                seq: path for seq, path in record["image"].items()
+                if isinstance(path, str) and Path(path).exists()
+            }
+            if not available_sequences:
+                raise ValueError(f"No valid images found for record {record['id']}")
+            
+            # Randomly select one sequence
+            sequence_name = random.choice(list(available_sequences.keys()))
+            image_path = available_sequences[sequence_name]
         else:
             raise ValueError(f"Invalid image format in record {record['id']}")
         
@@ -104,6 +116,10 @@ class PretrainDataset(Dataset):
             "image": image_path,
             "meta": copy.deepcopy(record)
         }
+        
+        # Add sequence info to meta if available
+        if sequence_name:
+            sample["meta"]["selected_sequence"] = sequence_name
         
         # Apply base preprocessing transform
         if self.transform is not None:
