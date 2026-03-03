@@ -242,18 +242,26 @@ def train_simclr(config_path: str, resume_from: Optional[str] = None):
     train_config = config.get("train", {})
     trainer_config = config.get("trainer", {})
     
-    # Handle strategy: None/null means single GPU, "ddp" means multi-GPU
-    strategy = trainer_config.get("strategy", "ddp")
-    if strategy is None or str(strategy).lower() in ["null", "none", "auto"]:
-        strategy = None  # Single GPU
-        sync_batchnorm = False  # No need to sync for single GPU
+    # Handle strategy: For DDP, use find_unused_parameters=True to handle unused params
+    strategy = trainer_config.get("strategy", "ddp_find_unused_parameters_true")
+    
+    # If strategy is explicitly set to "ddp", upgrade to find_unused_parameters version
+    if strategy == "ddp":
+        strategy = "ddp_find_unused_parameters_true"
+    
+    # For single GPU, strategy should be "auto" or None (handled by devices=1)
+    # If devices=1, Lightning will automatically use single GPU mode
+    devices = trainer_config.get("devices", "auto")
+    if devices == 1:
+        strategy = "auto"  # Single GPU mode
+        sync_batchnorm = False
     else:
         sync_batchnorm = trainer_config.get("sync_batchnorm", True)
     
     trainer = pl.Trainer(
         max_epochs=train_config.get("max_epochs", 100),
         accelerator=trainer_config.get("accelerator", "gpu"),
-        devices=trainer_config.get("devices", "auto"),
+        devices=devices,
         strategy=strategy,
         precision=train_config.get("precision", "16-mixed"),
         gradient_clip_val=train_config.get("gradient_clip_val", 1.0),

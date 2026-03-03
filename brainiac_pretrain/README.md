@@ -38,6 +38,8 @@ pip install pytorch-lightning
 pip install monai
 pip install nibabel
 pip install pyyaml
+pip install einops
+pip install tensorboard tensorboardX
 pip install wandb  # Optional, for Weights & Biases logging
 ```
 
@@ -138,15 +140,19 @@ Key configuration sections:
 
 ### Single GPU Training
 
-For single GPU training, modify the config file to set `strategy: null`:
+For single GPU training, you have two options:
 
+**Option 1: Use CUDA_VISIBLE_DEVICES (Recommended)**
+```bash
+CUDA_VISIBLE_DEVICES=0 python train.py --config configs/pretrain_simclr.yaml
+```
+
+**Option 2: Modify config file**
 ```yaml
-# In configs/pretrain_simclr.yaml, change the trainer section:
+# In configs/pretrain_simclr.yaml, change:
 trainer:
-  accelerator: "gpu"
-  devices: "auto"  # or set to 1 explicitly
-  strategy: null  # Set to null for single GPU (change from "ddp")
-  sync_batchnorm: false  # Change from true to false for single GPU
+  devices: 1  # Set to 1 for single GPU (instead of "auto")
+  # strategy will be automatically set to "auto" when devices=1
 ```
 
 Then run:
@@ -154,7 +160,7 @@ Then run:
 python train.py --config configs/pretrain_simclr.yaml
 ```
 
-**Note:** The default config uses `strategy: "ddp"` which requires multiple GPUs. For single GPU, you must set `strategy: null`.
+**Note:** PyTorch Lightning automatically uses single GPU mode when `devices=1`. The default config uses DDP for multi-GPU training.
 
 ### Multi-GPU Training (DDP)
 

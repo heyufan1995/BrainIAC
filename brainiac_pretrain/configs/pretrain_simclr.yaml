@@ -75,8 +75,8 @@ train:
 # Trainer configuration (PyTorch Lightning)
 trainer:
   accelerator: "gpu"  # "gpu" or "cpu"
-  devices: "auto"  # Number of devices or "auto"
-  strategy: "ddp"  # "ddp", "ddp_find_unused_parameters_false", "deepspeed", etc.
+  devices: "auto"  # Number of devices or "auto". Set to 1 for single GPU
+  strategy: "ddp_find_unused_parameters_true"  # DDP with unused parameter detection (required for SimCLR)
   sync_batchnorm: true  # Sync batch norm across GPUs
   log_every_n_steps: 50
   val_check_interval: null  # Validation check interval (None = end of epoch)
