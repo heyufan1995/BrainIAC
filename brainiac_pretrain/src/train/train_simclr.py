@@ -7,9 +7,10 @@ from pytorch_lightning.callbacks import ModelCheckpoint, LearningRateMonitor
 from pytorch_lightning.loggers import WandbLogger, TensorBoardLogger
 from typing import Optional, Dict, Any
 
-from ..models.simclr import SimCLRModel
-from ..losses.nt_xent import NTXentLoss
-from ..utils.checkpoint import save_checkpoint
+# Use absolute imports since src is added to sys.path
+from models.simclr import SimCLRModel
+from losses.nt_xent import NTXentLoss
+from utils.checkpoint import save_checkpoint
 
 
 class SimCLRLightningModule(pl.LightningModule):
@@ -160,7 +161,7 @@ def train_simclr(config_path: str, resume_from: Optional[str] = None):
         resume_from: Path to checkpoint to resume from (optional)
     """
     import yaml
-    from ..data.datamodule import PretrainDataModule
+    from data.datamodule import PretrainDataModule
     
     # Load configuration
     with open(config_path, 'r') as f:

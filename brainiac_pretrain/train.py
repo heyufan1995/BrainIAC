@@ -16,9 +16,11 @@ import argparse
 import sys
 from pathlib import Path
 
-# Add src to path
-sys.path.insert(0, str(Path(__file__).parent / "src"))
+# Add src to path so we can import from it
+src_path = Path(__file__).parent / "src"
+sys.path.insert(0, str(src_path))
 
+# Now import using absolute imports
 from train.train_simclr import train_simclr
 
 
